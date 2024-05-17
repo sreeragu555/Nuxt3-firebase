@@ -1,42 +1,70 @@
 <template>
-    <div class="form-container">
+    <div>
       <Head>
         <Title>MainPage</Title>
         <Meta name="description" content="Mainpage" />
       </Head>
-      <form @submit.prevent="handleSubmit" class="form">
-        <label for="email">Email address</label>
-        <input type="text" id="email" v-model="email" name="email" placeholder="Email" class="input"/><br>
-        <label for="password">Password</label>
-        <input type="password" id="password" v-model="password" name="password" placeholder="Password" class="input"/><br>
-        <input type="submit" value="Submit" class="submit-button">
-      </form>
+      <!-- Login Form -->
+      <div>
+        <h2>Login</h2>
+        Email address
+        <input type="text" v-model="loginEmail" placeholder="Email"/><br>
+        Password    
+        <input type="password" v-model="loginPassword" placeholder="Password"/><br>
+        <input type="button" value="Login" @click="login">
+      </div>
+      
+      <!-- Registration Form -->
+      <div>
+        <h2>Register</h2>
+        Email address
+        <input type="text" v-model="registerEmail" placeholder="Email"/><br>
+        Password    
+        <input type="password" v-model="registerPassword" placeholder="Password"/><br>
+        <input type="button" value="Register" @click="register">
+      </div>
     </div>
   </template>
   
   <script lang="ts" setup>
   import { ref } from 'vue';
-  import { useNuxtApp } from '#app';
   import { useRouter } from 'vue-router';
-  import { signInWithEmailAndPassword } from 'firebase/auth';
+  import { useNuxtApp } from '#app';
+  import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
   
-  const email = ref('');
-  const password = ref('');
+  const loginEmail = ref('');
+  const loginPassword = ref('');
+  const registerEmail = ref('');
+  const registerPassword = ref('');
+  
+  const { $firebaseAuth } = useNuxtApp();
   const router = useRouter();
-  const handleSubmit = async () => {
+  
+  // Login function
+  const login = async () => {
     try {
-      const { $firebaseAuth } = useNuxtApp();
-      const userCredential = await signInWithEmailAndPassword($firebaseAuth, email.value, password.value);
-      console.log("User signed in:", userCredential.user);
+      await signInWithEmailAndPassword($firebaseAuth, loginEmail.value, loginPassword.value);
+      console.log('User logged in');
       router.push('/submitdata');
     } catch (error) {
-      console.error("Error signing in:", error.message);
+      console.error('Error logging in:', error.message);
+    }
+  };
+  
+  // Registration function
+  const register = async () => {
+    try {
+      await createUserWithEmailAndPassword($firebaseAuth, registerEmail.value, registerPassword.value);
+      console.log('User registered');
+      router.push('/submitdata');
+    } catch (error) {
+      console.error('Error registering:', error.message);
     }
   };
   </script>
   
   <style scoped>
-  .form-container {
+  div {
     max-width: 400px;
     margin: 0 auto;
     padding: 20px;
@@ -46,17 +74,7 @@
     background-color: #f9f9f9;
   }
   
-  .form {
-    display: flex;
-    flex-direction: column;
-  }
-  
-  label {
-    margin-bottom: 8px;
-    font-weight: bold;
-  }
-  
-  .input {
+  input[type="text"], input[type="password"] {
     padding: 10px;
     margin-bottom: 16px;
     border: 1px solid #ccc;
@@ -64,7 +82,7 @@
     font-size: 16px;
   }
   
-  .submit-button {
+  input[type="button"] {
     padding: 10px 20px;
     font-size: 16px;
     color: #fff;
@@ -75,7 +93,7 @@
     transition: background-color 0.3s ease;
   }
   
-  .submit-button:hover {
+  input[type="button"]:hover {
     background-color: #0056b3;
   }
   </style>
